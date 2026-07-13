@@ -1,0 +1,224 @@
+import {useEffect, useState} from 'react';
+import {Theme} from '@astryxdesign/core/theme';
+import {y2kTheme} from '@astryxdesign/theme-y2k/built';
+import {VStack, HStack} from '@astryxdesign/core/Layout';
+import {Button} from '@astryxdesign/core/Button';
+import {Text, Heading} from '@astryxdesign/core/Text';
+import {TextInput} from '@astryxdesign/core/TextInput';
+import {Card} from '@astryxdesign/core/Card';
+import {Banner} from '@astryxdesign/core/Banner';
+import {Divider} from '@astryxdesign/core/Divider';
+import {ProgressBar} from '@astryxdesign/core/ProgressBar';
+import {Collapsible} from '@astryxdesign/core/Collapsible';
+import {
+  SegmentedControl,
+  SegmentedControlItem,
+} from '@astryxdesign/core/SegmentedControl';
+import {computeTotp, formatToken, type TotpOptions} from './totp';
+
+const EXAMPLE_SECRET = 'JBSWY3DPEHPK3PXP';
+
+export default function App() {
+  const [secret, setSecret] = useState('');
+  const [digits, setDigits] = useState('6');
+  const [period, setPeriod] = useState('30');
+  const [algorithm, setAlgorithm] = useState<TotpOptions['algorithm']>('SHA1');
+  const [now, setNow] = useState(() => Date.now());
+  const [copied, setCopied] = useState(false);
+
+  // Nhịp đồng hồ: cứ mỗi giây cập nhật thời gian để mã và vòng đếm ngược tự đổi.
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const opts: TotpOptions = {
+    digits: Number(digits),
+    period: Number(period),
+    algorithm,
+  };
+  const isUri = secret.trim().toLowerCase().startsWith('otpauth://');
+  const result = computeTotp(secret, opts, now);
+
+  const copyCode = async () => {
+    if (result?.ok) {
+      try {
+        await navigator.clipboard.writeText(result.token);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      } catch {
+        /* Nếu trình duyệt chặn clipboard thì bỏ qua, người dùng tự bôi đen copy. */
+      }
+    }
+  };
+
+  const remaining = result?.ok ? result.remaining : 0;
+  const barVariant = remaining <= 5 ? 'error' : remaining <= 10 ? 'warning' : 'accent';
+
+  return (
+    <Theme theme={y2kTheme}>
+      <main
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1.5rem',
+        }}
+      >
+        <div style={{width: '100%', maxWidth: 460}}>
+          <Card padding={6}>
+            <VStack gap={5}>
+              <VStack gap={1}>
+                <Heading level={1}>🔐 2FA Live</Heading>
+                <Text type="body" color="secondary">
+                  Dán mã bí mật, nhận ngay mã xác thực 2 bước 6 số — giống Google
+                  Authenticator, nhưng chạy thẳng trên trình duyệt.
+                </Text>
+              </VStack>
+
+              <Banner
+                status="success"
+                title="Riêng tư 100%"
+                description="Mọi tính toán chạy trên máy bạn. Mã bí mật không được gửi lên mạng hay lưu lại ở đâu cả."
+              />
+
+              <VStack gap={2}>
+                <TextInput
+                  label="Mã bí mật (Secret Key)"
+                  placeholder="Ví dụ: JBSW Y3DP EHPK 3PXP  —  hoặc dán link otpauth://"
+                  value={secret}
+                  onChange={setSecret}
+                  status={
+                    result && !result.ok
+                      ? {type: 'error', message: result.error}
+                      : undefined
+                  }
+                />
+                <HStack gap={2}>
+                  <Button
+                    label="Thử mã ví dụ"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSecret(EXAMPLE_SECRET)}
+                  />
+                  {secret && (
+                    <Button
+                      label="Xóa"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSecret('')}
+                    />
+                  )}
+                </HStack>
+              </VStack>
+
+              {result?.ok ? (
+                <VStack gap={3}>
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 'clamp(2.75rem, 13vw, 3.75rem)',
+                      fontWeight: 800,
+                      letterSpacing: '0.12em',
+                      fontVariantNumeric: 'tabular-nums',
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    {formatToken(result.token)}
+                  </div>
+
+                  <ProgressBar
+                    label="Thời gian còn lại"
+                    value={result.remaining}
+                    max={result.period}
+                    variant={barVariant}
+                    hasValueLabel
+                    formatValueLabel={(v) => `Còn ${v} giây`}
+                  />
+
+                  <Button
+                    label={copied ? 'Đã sao chép ✓' : 'Sao chép mã'}
+                    variant="primary"
+                    onClick={copyCode}
+                  />
+                </VStack>
+              ) : (
+                <Card padding={5}>
+                  <Text type="body" color="secondary">
+                    Nhập mã bí mật ở ô trên để bắt đầu tạo mã. Chưa có mã?
+                    Bấm “Thử mã ví dụ” để xem thử.
+                  </Text>
+                </Card>
+              )}
+
+              <Collapsible
+                trigger={<Text weight="bold">Tùy chọn nâng cao</Text>}
+                defaultIsOpen={false}
+              >
+                <VStack gap={4}>
+                  <VStack gap={2}>
+                    <Text type="supporting" color="secondary">
+                      Số chữ số
+                    </Text>
+                    <SegmentedControl
+                      label="Số chữ số"
+                      value={digits}
+                      onChange={setDigits}
+                      isDisabled={isUri}
+                      disabledMessage="Đang dùng link otpauth://, cấu hình lấy sẵn từ link."
+                    >
+                      <SegmentedControlItem value="6" label="6 số" />
+                      <SegmentedControlItem value="8" label="8 số" />
+                    </SegmentedControl>
+                  </VStack>
+
+                  <VStack gap={2}>
+                    <Text type="supporting" color="secondary">
+                      Đổi mã sau mỗi
+                    </Text>
+                    <SegmentedControl
+                      label="Chu kỳ"
+                      value={period}
+                      onChange={setPeriod}
+                      isDisabled={isUri}
+                      disabledMessage="Đang dùng link otpauth://, cấu hình lấy sẵn từ link."
+                    >
+                      <SegmentedControlItem value="30" label="30 giây" />
+                      <SegmentedControlItem value="60" label="60 giây" />
+                    </SegmentedControl>
+                  </VStack>
+
+                  <VStack gap={2}>
+                    <Text type="supporting" color="secondary">
+                      Thuật toán
+                    </Text>
+                    <SegmentedControl
+                      label="Thuật toán"
+                      value={algorithm}
+                      onChange={(v) => setAlgorithm(v as TotpOptions['algorithm'])}
+                      isDisabled={isUri}
+                      disabledMessage="Đang dùng link otpauth://, cấu hình lấy sẵn từ link."
+                    >
+                      <SegmentedControlItem value="SHA1" label="SHA1" />
+                      <SegmentedControlItem value="SHA256" label="SHA256" />
+                      <SegmentedControlItem value="SHA512" label="SHA512" />
+                    </SegmentedControl>
+                  </VStack>
+                </VStack>
+              </Collapsible>
+
+              <Divider />
+
+              <Text type="supporting" color="secondary">
+                Gợi ý: mã bí mật là chuỗi chữ và số hiện ra khi dịch vụ yêu cầu
+                bật xác thực 2 bước (thường kèm mã QR, bấm “không quét được / nhập
+                thủ công”). Giữ mã này cẩn thận như mật khẩu.
+              </Text>
+            </VStack>
+          </Card>
+        </div>
+      </main>
+    </Theme>
+  );
+}

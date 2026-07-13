@@ -1,0 +1,10 @@
+# Thư viện cài về (nặng, GitHub tự cài lại khi build)
+node_modules/
+
+# Bản build ra (GitHub Actions tự tạo lại)
+dist/
+
+# File tạm / log
+*.log
+.DS_Store
+.vite/
