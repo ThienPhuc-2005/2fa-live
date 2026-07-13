@@ -15,6 +15,13 @@ import {
   SegmentedControlItem,
 } from '@astryxdesign/core/SegmentedControl';
 import {computeTotp, formatToken, type TotpOptions} from './totp';
+import {
+  ShieldCheckIcon,
+  CopyIcon,
+  CheckIcon,
+  TelegramIcon,
+  InstagramIcon,
+} from './icons';
 
 const EXAMPLE_SECRET = 'JBSWY3DPEHPK3PXP';
 
@@ -70,7 +77,24 @@ export default function App() {
           <Card padding={6}>
             <VStack gap={5}>
               <VStack gap={1}>
-                <Heading level={1}>🔐 2FA Live</Heading>
+                <HStack gap={2} vAlign="center">
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      background: 'rgba(255,255,255,0.07)',
+                      border: '1px solid rgba(255,255,255,0.14)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <ShieldCheckIcon size={26} />
+                  </span>
+                  <Heading level={1}>2FA Live</Heading>
+                </HStack>
                 <Text type="body" color="secondary">
                   Dán mã bí mật, nhận ngay mã xác thực 2 bước 6 số — giống Google
                   Authenticator, nhưng chạy thẳng trên trình duyệt.
@@ -138,8 +162,9 @@ export default function App() {
                   />
 
                   <Button
-                    label={copied ? 'Đã sao chép ✓' : 'Sao chép mã'}
+                    label={copied ? 'Đã sao chép' : 'Sao chép mã'}
                     variant="primary"
+                    icon={copied ? <CheckIcon size={18} /> : <CopyIcon size={18} />}
                     onClick={copyCode}
                   />
                 </VStack>
@@ -208,13 +233,47 @@ export default function App() {
                 </VStack>
               </Collapsible>
 
-              <Divider />
-
               <Text type="supporting" color="secondary">
                 Gợi ý: mã bí mật là chuỗi chữ và số hiện ra khi dịch vụ yêu cầu
                 bật xác thực 2 bước (thường kèm mã QR, bấm “không quét được / nhập
                 thủ công”). Giữ mã này cẩn thận như mật khẩu.
               </Text>
+
+              <Divider />
+
+              <VStack gap={2}>
+                <Text type="supporting" color="secondary">
+                  Có thắc mắc hay cần hỗ trợ? Nhắn mình nhé:
+                </Text>
+                <HStack gap={2}>
+                  <Button
+                    label="Telegram"
+                    variant="secondary"
+                    size="sm"
+                    icon={<TelegramIcon />}
+                    onClick={() =>
+                      window.open(
+                        'https://t.me/Benedetta24k',
+                        '_blank',
+                        'noopener,noreferrer',
+                      )
+                    }
+                  />
+                  <Button
+                    label="Instagram"
+                    variant="secondary"
+                    size="sm"
+                    icon={<InstagramIcon />}
+                    onClick={() =>
+                      window.open(
+                        'https://www.instagram.com/thien240805/',
+                        '_blank',
+                        'noopener,noreferrer',
+                      )
+                    }
+                  />
+                </HStack>
+              </VStack>
             </VStack>
           </Card>
         </div>
