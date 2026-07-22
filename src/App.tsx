@@ -174,7 +174,7 @@ export default function App() {
                 <Text type="supporting" color="secondary">
                   Có thắc mắc hay cần hỗ trợ? Nhắn mình nhé:
                 </Text>
-                <HStack gap={2}>
+                <HStack gap={2} wrap="wrap" hAlign="center">
                   <Button
                     label="Telegram"
                     variant="secondary"
