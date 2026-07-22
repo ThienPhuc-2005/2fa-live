@@ -9,11 +9,6 @@ import {Card} from '@astryxdesign/core/Card';
 import {Banner} from '@astryxdesign/core/Banner';
 import {Divider} from '@astryxdesign/core/Divider';
 import {ProgressBar} from '@astryxdesign/core/ProgressBar';
-import {Collapsible} from '@astryxdesign/core/Collapsible';
-import {
-  SegmentedControl,
-  SegmentedControlItem,
-} from '@astryxdesign/core/SegmentedControl';
 import {computeTotp, formatToken, type TotpOptions} from './totp';
 import {
   ShieldCheckIcon,
@@ -21,15 +16,13 @@ import {
   CheckIcon,
   TelegramIcon,
   InstagramIcon,
+  GithubIcon,
 } from './icons';
 
 const EXAMPLE_SECRET = 'JBSWY3DPEHPK3PXP';
 
 export default function App() {
   const [secret, setSecret] = useState('');
-  const [digits, setDigits] = useState('6');
-  const [period, setPeriod] = useState('30');
-  const [algorithm, setAlgorithm] = useState<TotpOptions['algorithm']>('SHA1');
   const [now, setNow] = useState(() => Date.now());
   const [copied, setCopied] = useState(false);
 
@@ -39,12 +32,10 @@ export default function App() {
     return () => clearInterval(id);
   }, []);
 
-  const opts: TotpOptions = {
-    digits: Number(digits),
-    period: Number(period),
-    algorithm,
-  };
-  const isUri = secret.trim().toLowerCase().startsWith('otpauth://');
+  // Chuẩn phổ biến nhất, cũng là mặc định của hầu hết dịch vụ (Google, Facebook,
+  // Binance...): 6 số, đổi mỗi 30 giây, thuật toán SHA1. Nếu người dùng dán link
+  // otpauth:// thì cấu hình tự lấy từ link, không dùng mấy giá trị này.
+  const opts: TotpOptions = {digits: 6, period: 30, algorithm: 'SHA1'};
   const result = computeTotp(secret, opts, now);
 
   const copyCode = async () => {
@@ -63,7 +54,7 @@ export default function App() {
   const barVariant = remaining <= 5 ? 'error' : remaining <= 10 ? 'warning' : 'accent';
 
   return (
-    <Theme theme={y2kTheme}>
+    <Theme theme={y2kTheme} mode="dark">
       <main
         style={{
           minHeight: '100vh',
@@ -177,68 +168,6 @@ export default function App() {
                 </Card>
               )}
 
-              <Collapsible
-                trigger={<Text weight="bold">Tùy chọn nâng cao</Text>}
-                defaultIsOpen={false}
-              >
-                <VStack gap={4}>
-                  <VStack gap={2}>
-                    <Text type="supporting" color="secondary">
-                      Số chữ số
-                    </Text>
-                    <SegmentedControl
-                      label="Số chữ số"
-                      value={digits}
-                      onChange={setDigits}
-                      isDisabled={isUri}
-                      disabledMessage="Đang dùng link otpauth://, cấu hình lấy sẵn từ link."
-                    >
-                      <SegmentedControlItem value="6" label="6 số" />
-                      <SegmentedControlItem value="8" label="8 số" />
-                    </SegmentedControl>
-                  </VStack>
-
-                  <VStack gap={2}>
-                    <Text type="supporting" color="secondary">
-                      Đổi mã sau mỗi
-                    </Text>
-                    <SegmentedControl
-                      label="Chu kỳ"
-                      value={period}
-                      onChange={setPeriod}
-                      isDisabled={isUri}
-                      disabledMessage="Đang dùng link otpauth://, cấu hình lấy sẵn từ link."
-                    >
-                      <SegmentedControlItem value="30" label="30 giây" />
-                      <SegmentedControlItem value="60" label="60 giây" />
-                    </SegmentedControl>
-                  </VStack>
-
-                  <VStack gap={2}>
-                    <Text type="supporting" color="secondary">
-                      Thuật toán
-                    </Text>
-                    <SegmentedControl
-                      label="Thuật toán"
-                      value={algorithm}
-                      onChange={(v) => setAlgorithm(v as TotpOptions['algorithm'])}
-                      isDisabled={isUri}
-                      disabledMessage="Đang dùng link otpauth://, cấu hình lấy sẵn từ link."
-                    >
-                      <SegmentedControlItem value="SHA1" label="SHA1" />
-                      <SegmentedControlItem value="SHA256" label="SHA256" />
-                      <SegmentedControlItem value="SHA512" label="SHA512" />
-                    </SegmentedControl>
-                  </VStack>
-                </VStack>
-              </Collapsible>
-
-              <Text type="supporting" color="secondary">
-                Gợi ý: mã bí mật là chuỗi chữ và số hiện ra khi dịch vụ yêu cầu
-                bật xác thực 2 bước (thường kèm mã QR, bấm “không quét được / nhập
-                thủ công”). Giữ mã này cẩn thận như mật khẩu.
-              </Text>
-
               <Divider />
 
               <VStack gap={2}>
@@ -266,7 +195,20 @@ export default function App() {
                     icon={<InstagramIcon />}
                     onClick={() =>
                       window.open(
-                        'https://www.instagram.com/thien240805/',
+                        'https://www.instagram.com/seahaven.agent/',
+                        '_blank',
+                        'noopener,noreferrer',
+                      )
+                    }
+                  />
+                  <Button
+                    label="GitHub"
+                    variant="secondary"
+                    size="sm"
+                    icon={<GithubIcon />}
+                    onClick={() =>
+                      window.open(
+                        'https://github.com/ThienPhuc-2005',
                         '_blank',
                         'noopener,noreferrer',
                       )
