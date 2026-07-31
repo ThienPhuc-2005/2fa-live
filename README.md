@@ -30,3 +30,8 @@ npm run build    # tạo thư mục dist/
 Kho này có sẵn file `.github/workflows/deploy.yml`: mỗi lần đẩy code lên nhánh
 `main`, GitHub tự build và đăng web. Chỉ cần vào **Settings → Pages → Source:
 GitHub Actions** một lần để bật.
+
+## Liên hệ
+
+- Facebook: https://www.facebook.com/thien.phuc.450676/
+- Telegram: https://t.me/Benedetta24k
