@@ -15,6 +15,7 @@ import {
   CopyIcon,
   CheckIcon,
   TelegramIcon,
+  ThreadsIcon,
   InstagramIcon,
   GithubIcon,
 } from './icons';
@@ -182,7 +183,20 @@ export default function App() {
                     icon={<TelegramIcon />}
                     onClick={() =>
                       window.open(
-                        'https://t.me/Benedetta24k',
+                        'https://t.me/Atlantis24k',
+                        '_blank',
+                        'noopener,noreferrer',
+                      )
+                    }
+                  />
+                  <Button
+                    label="Threads"
+                    variant="secondary"
+                    size="sm"
+                    icon={<ThreadsIcon />}
+                    onClick={() =>
+                      window.open(
+                        'https://www.threads.com/@thien240805',
                         '_blank',
                         'noopener,noreferrer',
                       )
